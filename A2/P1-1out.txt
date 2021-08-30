@@ -1,0 +1,77 @@
+WAR-2 (Loaded) Wating at the Intersection. Going towards Dock2
+WAR-6 (Loaded) Wating at the Intersection. Going towards Dock1
+WAR-5 (Unoaded) Wating at the Intersection. Going towards Storage1
+WAR-4 (Unloaded) Wating at the Intersection. Going towards Storage2
+WAR-1 (Loaded) Wating at the Intersection. Going towards Dock2
+WAR-3 (Loaded) Wating at the Intersection. Going towards Dock2
+WAR-2 (Loaded) Crossing intersection Checkpoint 1.
+WAR-2 (Loaded) Crossing intersection Checkpoint 2.
+WAR-2 (Loaded) Crossing intersection Checkpoint 3.
+WAR-2 (Loaded) Crossed the intersection.
+Total crossed in Track1 0 Track2 1
+WAR-6 (Loaded) Crossing intersection Checkpoint 1.
+WAR-6 (Loaded) Crossing intersection Checkpoint 2.
+WAR-2 (Unloaded) Wating at the Intersection. Going towards Storage2
+WAR-6 (Loaded) Crossing intersection Checkpoint 3.
+WAR-6 (Loaded) Crossed the intersection.
+Total crossed in Track1 1 Track2 1
+WAR-5 (Unoaded) Crossing intersection Checkpoint 1.
+WAR-5 (Unoaded) Crossing intersection Checkpoint 2.
+WAR-6 (Unloaded) Wating at the Intersection. Going towards Storage1
+WAR-5 (Unoaded) Crossing intersection Checkpoint 3.
+WAR-5 (Unoaded) Crossed the intersection.
+Total crossed in Track1 2 Track2 1
+WAR-4 (Unloaded) Crossing intersection Checkpoint 1.
+WAR-5 (Loaded) Wating at the Intersection. Going towards Dock1
+WAR-4 (Unloaded) Crossing intersection Checkpoint 2.
+WAR-4 (Unloaded) Crossing intersection Checkpoint 3.
+WAR-4 (Unloaded) Crossed the intersection.
+Total crossed in Track1 2 Track2 2
+WAR-1 (Loaded) Crossing intersection Checkpoint 1.
+WAR-4 (Loaded) Wating at the Intersection. Going towards Dock2
+WAR-1 (Loaded) Crossing intersection Checkpoint 2.
+WAR-1 (Loaded) Crossing intersection Checkpoint 3.
+WAR-1 (Loaded) Crossed the intersection.
+Total crossed in Track1 2 Track2 3
+WAR-3 (Loaded) Crossing intersection Checkpoint 1.
+WAR-3 (Loaded) Crossing intersection Checkpoint 2.
+WAR-1 (Unloaded) Wating at the Intersection. Going towards Storage2
+WAR-3 (Loaded) Crossing intersection Checkpoint 3.
+WAR-3 (Loaded) Crossed the intersection.
+Total crossed in Track1 2 Track2 4
+WAR-2 (Unloaded) Crossing intersection Checkpoint 1.
+WAR-3 (Unloaded) Wating at the Intersection. Going towards Storage2
+WAR-2 (Unloaded) Crossing intersection Checkpoint 2.
+WAR-2 (Unloaded) Crossing intersection Checkpoint 3.
+WAR-2 (Unloaded) Crossed the intersection.
+Total crossed in Track1 2 Track2 5
+WAR-6 (Unloaded) Crossing intersection Checkpoint 1.
+WAR-2 (Loaded) Wating at the Intersection. Going towards Dock2
+WAR-6 (Unloaded) Crossing intersection Checkpoint 2.
+WAR-6 (Unloaded) Crossing intersection Checkpoint 3.
+WAR-6 (Unloaded) Crossed the intersection.
+Total crossed in Track1 3 Track2 5
+WAR-5 (Loaded) Crossing intersection Checkpoint 1.
+WAR-5 (Loaded) Crossing intersection Checkpoint 2.
+WAR-6 (Loaded) Wating at the Intersection. Going towards Dock1
+WAR-5 (Loaded) Crossing intersection Checkpoint 3.
+WAR-5 (Loaded) Crossed the intersection.
+Total crossed in Track1 4 Track2 5
+WAR-4 (Loaded) Crossing intersection Checkpoint 1.
+WAR-4 (Loaded) Crossing intersection Checkpoint 2.
+WAR-5 (Unloaded) Wating at the Intersection. Going towards Storage1
+WAR-4 (Loaded) Crossing intersection Checkpoint 3.
+WAR-4 (Loaded) Crossed the intersection.
+Total crossed in Track1 4 Track2 6
+WAR-1 (Unloaded) Crossing intersection Checkpoint 1.
+WAR-4 (Unloaded) Wating at the Intersection. Going towards Storage2
+WAR-1 (Unloaded) Crossing intersection Checkpoint 2.
+WAR-1 (Unloaded) Crossing intersection Checkpoint 3.
+WAR-1 (Unloaded) Crossed the intersection.
+Total crossed in Track1 4 Track2 7
+WAR-3 (Unloaded) Crossing intersection Checkpoint 1.
+WAR-1 (Loaded) Wating at the Intersection. Going towards Dock2
+WAR-3 (Unloaded) Crossing intersection Checkpoint 2.
+WAR-3 (Unloaded) Crossing intersection Checkpoint 3.
+......
+......

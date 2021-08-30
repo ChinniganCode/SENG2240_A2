@@ -1,0 +1,10 @@
+(0) M1 uses head 1 (time:4)
+(0) M2 uses head 2 (time:5)
+(0) M3 uses head 3 (time:3)
+(5) C1 uses head 1 (time:5)
+(5) C2 uses head 2 (time:3)
+(5) C3 uses head 3 (time:2)
+(7) C4 uses head 3 (time:2)
+(10) M4 uses head 1 (time:3)
+(10) M5 uses head 2 (time:2)
+(13) DONE

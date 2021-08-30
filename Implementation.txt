@@ -1,0 +1,60 @@
+Problem 1:
+
+- Storage 1 (North)
+- Dock 2 (South)
+- Dock 1 (East)
+- Storage 2 (West)
+
+- Track 1: Connects Storage 1 (West) to Dock 1 (East) l -> r
+- Track 2: Connects Storage 2 (North) to Dock 2 (South) u -> d
+
+- WARs are loaded in their trip from storage to dock
+- WARs are unloaded in their return trip
+- WARs can only go forward
+- Each WAR has:
+    - a UID
+    - status (loaded or unloaded)
+    - a track they drive on (cannot change)
+
+Rules for intersection:
+1. Cannot have two WARs enter the intersection simultaneously (deadlock)
+2. Starvation free (one stream cannot prevent another stream to cross)
+3. Three checkpoint sensors in the intersection, add 200ms delay after each checkpoint to simulate the time to pass the checkpoint.
+    - Need to count each time a WAR in a track crosses an intersection
+4. Loading/Unloading happens instantly after a war crosses the intersection
+
+To Implement:
+- Using semaphores, design algorithm that prevents deadlocks
+- Use threads to simulate concurrent WARs
+- Assume the group of WARs are constantly trying to use the intersection in all four directions
+- Input parameters define the number of wars in each direction
+- Wars should be numbered continuously (e.g. WAR-1, WAR-2 etc.) can choose how to number wars
+- Direction defines whether WAR is loading or unloading
+
+Track 1 (N->E): LOADED
+Track 1 (E->N): UNLOADED
+Track 2 (W->S): LOADED
+Track 2 (S->W): UNLOADED
+
+e.g. N=3 S=1 E=1 W=1
+- 6 WARS
+N=3: S2 LOADED, GOING TO D2
+S=1: D2 UNLOADED, GOING TO S2
+E=1: D1 UNLOADED, GOING TO S1
+W=1: S1 LOADED, GOING TO D1
+
+These wars will constantly try to use the intersection
+
+- War.java
+- Track.java
+- P1.java
+    - Reads input file and runs simulation
+
+
+- IF a WAR gains access to first checkpoint, grant access
+
+- Read WARs from file, implement them as threads
+- Need a semaphore with a limit of 1
+- Need WARs constantly running as threads
+- Check direction when WAR completes and increment its track counter
+

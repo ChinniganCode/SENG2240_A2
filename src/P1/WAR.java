@@ -17,19 +17,40 @@ public class WAR extends Thread {
     private String destination; // e.g. Dock1, Dock2, Storage1, Storage2
     private String location; // e.g. Dock1, Dock2, Storage1, Storage2
     private String loaded; //whether the WAR is loaded or not, can be determined by location + destination
+    private Intersection intersection;
 
-    public WAR(String id, char startDirection) {
+    public WAR(String id, char startDirection, Intersection intersection) {
         this.id = id;
+        this.intersection = intersection;
         setInitLocation(startDirection);
         updateWAR();
     }
 
     @Override
     public void run() {
-        while(true) {
-            System.out.println("WAR-" + id +" (" + loaded + ") "+"Waiting at the intersection. Going towards " + destination);
-            //Semaphore
+        if (location.contains("1")) {
+            while (intersection.getTrack1Crossed() < 150) {
+                runCheckPoint();
+            }
+        } else {
+            while (intersection.getTrack2Crossed() < 150) {
+                runCheckPoint();
+            }
         }
+    }
+    public void runCheckPoint() {
+        System.out.println("WAR-" + id + " (" + loaded + ") " + "Waiting at the intersection. Going towards " + destination);
+        intersection.acquireSem(this);
+        System.out.println("WAR-" + id + " (" + loaded + ") " + "Crossing intersection Checkpoint 1.");
+        try { Thread.sleep(5); } catch (InterruptedException e) { e.printStackTrace(); }
+        System.out.println("WAR-" + id + " (" + loaded + ") " + "Crossing intersection Checkpoint 2.");
+        try { Thread.sleep(5); } catch (InterruptedException e) {e.printStackTrace(); }
+        System.out.println("WAR-" + id + " (" + loaded + ") " + "Crossing intersection Checkpoint 3.");
+        try { Thread.sleep(5); } catch (InterruptedException e) { e.printStackTrace(); }
+        System.out.println("WAR-" + id + " (" + loaded + ") " + "Crossed The Intersection");
+        turnAround();
+        intersection.printCount();
+        intersection.releaseSem();
     }
     public void updateWAR() {
         switch(location) {
@@ -77,7 +98,7 @@ public class WAR extends Thread {
                 break;
             case "Storage2":
                 destination = "Storage2";
-                location = "Dock1";
+                location = "Dock2";
                 loaded = "UNLOADED";
                 break;
             case "Dock1":
@@ -91,5 +112,10 @@ public class WAR extends Thread {
                 loaded = "LOADED";
                 break;
         }
+    }
+
+
+    public String getLocation() {
+        return location;
     }
 }

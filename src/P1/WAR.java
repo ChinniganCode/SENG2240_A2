@@ -24,11 +24,11 @@ public class WAR extends Thread {
                 break;
             }
             System.out.println(id + " (" + loaded + ") " + "Crossing intersection Checkpoint 1.");
-            try { Thread.sleep(5); } catch (InterruptedException e) { e.printStackTrace(); }
+            try { Thread.sleep(200); } catch (InterruptedException e) { e.printStackTrace(); }
             System.out.println(id + " (" + loaded + ") " + "Crossing intersection Checkpoint 2.");
-            try { Thread.sleep(5); } catch (InterruptedException e) {e.printStackTrace(); }
+            try { Thread.sleep(200); } catch (InterruptedException e) {e.printStackTrace(); }
             System.out.println(id + " (" + loaded + ") " + "Crossing intersection Checkpoint 3.");
-            try { Thread.sleep(5); } catch (InterruptedException e) { e.printStackTrace(); }
+            try { Thread.sleep(200); } catch (InterruptedException e) { e.printStackTrace(); }
             System.out.println(id + " (" + loaded + ") " + "Crossed The Intersection");
             intersection.incrementCount(this);
             turnAround();

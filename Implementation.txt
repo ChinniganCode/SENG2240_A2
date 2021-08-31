@@ -58,3 +58,8 @@ These wars will constantly try to use the intersection
 - Need WARs constantly running as threads
 - Check direction when WAR completes and increment its track counter
 
+
+
+Problem 2:
+
+

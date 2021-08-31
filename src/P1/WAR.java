@@ -1,17 +1,5 @@
 package P1;
 
-/*TODO:
-- Read each WAR from the text file
-- Have each WAR run on a thread using implement Runnable or extends Thread
-- try to run indefinetely
-1. Announce e.g. "WAR-X (LOADED) Wating at the Intersection. Going towards destination
-2. attempt to get access to semaphore
-3. Once access aquired, announce Checkpoint 1, Sleep(200), Checkpoint 2, Sleep(200), Checkpoint 3, Sleep(200)
-4. Announce crossed e.g. "WAR-X (LOADED) cross the intersection"
-5. Change loaded, destination and location
-6. Print updated count (not in this class)
-*/
-
 public class WAR extends Thread {
     private String id; // i.e. WAR-X
     private String destination; // e.g. Dock1, Dock2, Storage1, Storage2
@@ -28,30 +16,29 @@ public class WAR extends Thread {
 
     @Override
     public void run() {
-        if (location.contains("1")) {
-            while (intersection.getTrack1Crossed() < 150) {
-                runCheckPoint();
+        while (!(intersection.getTrack1Crossed() >= 150 && intersection.getTrack2Crossed() >= 150))  {
+            System.out.println(id + " (" + loaded + ") " + "Waiting at the intersection. Going towards " + destination);
+            intersection.acquireSem();
+            if((intersection.getTrack1Crossed() >= 150 && intersection.getTrack2Crossed() >= 150)) {
+                intersection.releaseSem();
+                break;
             }
-        } else {
-            while (intersection.getTrack2Crossed() < 150) {
-                runCheckPoint();
-            }
+            System.out.println(id + " (" + loaded + ") " + "Crossing intersection Checkpoint 1.");
+            try { Thread.sleep(5); } catch (InterruptedException e) { e.printStackTrace(); }
+            System.out.println(id + " (" + loaded + ") " + "Crossing intersection Checkpoint 2.");
+            try { Thread.sleep(5); } catch (InterruptedException e) {e.printStackTrace(); }
+            System.out.println(id + " (" + loaded + ") " + "Crossing intersection Checkpoint 3.");
+            try { Thread.sleep(5); } catch (InterruptedException e) { e.printStackTrace(); }
+            System.out.println(id + " (" + loaded + ") " + "Crossed The Intersection");
+            intersection.incrementCount(this);
+            turnAround();
+            intersection.printCount();
+            intersection.releaseSem();
         }
+   //     System.exit(0);
     }
-    public void runCheckPoint() {
-        System.out.println("WAR-" + id + " (" + loaded + ") " + "Waiting at the intersection. Going towards " + destination);
-        intersection.acquireSem(this);
-        System.out.println("WAR-" + id + " (" + loaded + ") " + "Crossing intersection Checkpoint 1.");
-        try { Thread.sleep(5); } catch (InterruptedException e) { e.printStackTrace(); }
-        System.out.println("WAR-" + id + " (" + loaded + ") " + "Crossing intersection Checkpoint 2.");
-        try { Thread.sleep(5); } catch (InterruptedException e) {e.printStackTrace(); }
-        System.out.println("WAR-" + id + " (" + loaded + ") " + "Crossing intersection Checkpoint 3.");
-        try { Thread.sleep(5); } catch (InterruptedException e) { e.printStackTrace(); }
-        System.out.println("WAR-" + id + " (" + loaded + ") " + "Crossed The Intersection");
-        turnAround();
-        intersection.printCount();
-        intersection.releaseSem();
-    }
+
+
     public void updateWAR() {
         switch(location) {
             case "Storage1":
@@ -88,7 +75,6 @@ public class WAR extends Thread {
                 break;
         }
     }
-
     public void turnAround() {
         switch (location) {
             case "Storage1":
@@ -113,7 +99,6 @@ public class WAR extends Thread {
                 break;
         }
     }
-
 
     public String getLocation() {
         return location;

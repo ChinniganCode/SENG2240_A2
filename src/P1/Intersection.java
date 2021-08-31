@@ -13,38 +13,31 @@ public class Intersection {
         sem = new Semaphore(1,true);
     }
 
-    public void acquireSem(WAR input) {
+    public void acquireSem() {
             try {
                 sem.acquire();
-                if(input.getLocation().contains("1")) {
-                    track1Crossed++;
-                } else if(input.getLocation().contains("2")) {
-                    track2Crossed++;
-                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+    }
+    public void incrementCount(WAR input) {
+        if(input.getLocation().contains("1")) {
+            track1Crossed++;
+        } else if(input.getLocation().contains("2")) {
+            track2Crossed++;
         }
+    }
     public void releaseSem()  {
         sem.release();
     }
     public void printCount() {
         System.out.println("Total crossed in Track1 " + track1Crossed + " Track2 " + track2Crossed);
     }
-
     public int getTrack1Crossed() {
         return track1Crossed;
     }
-
-    public void setTrack1Crossed(int track1Crossed) {
-        this.track1Crossed = track1Crossed;
-    }
-
     public int getTrack2Crossed() {
         return track2Crossed;
     }
 
-    public void setTrack2Crossed(int track2Crossed) {
-        this.track2Crossed = track2Crossed;
-    }
 }

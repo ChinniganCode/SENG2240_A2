@@ -6,15 +6,11 @@ import java.util.Scanner;
 public class P1 {
     public static Intersection intersection = new Intersection();
     public static void main(String[] args) {
-        readFile(args[0]);
-    }
-
-    public static void readFile(String arg) {
         String input;
         int numWars;
         int warCount = 1;
         try {
-            File myObj = new File(arg); //file input
+            File myObj = new File(args[0]); //file input
             Scanner myReader = new Scanner(myObj);
             while(myReader.hasNext()) {
                 input = myReader.next();
@@ -31,4 +27,5 @@ public class P1 {
             e.printStackTrace();
         }
     }
+
 }

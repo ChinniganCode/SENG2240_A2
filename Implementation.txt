@@ -61,5 +61,10 @@ These wars will constantly try to use the intersection
 
 
 Problem 2:
+- Two 'modes' colour and monochrome
+- Can do three of the same job 'at a time'
+- Must be served in order
 
+- Two queues, a colour queue and a monochrome queue
+-
 

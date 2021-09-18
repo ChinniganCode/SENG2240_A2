@@ -1,10 +1,12 @@
-package P2;
+package P3;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Scanner;
 
-public class P2 {
+public class P3 {
     public static Printer printer = new Printer();
+    public static ArrayList<Job> jobList = new ArrayList<Job>();
     public static void main(String[] args) {
         String input;
         int numJobs;
@@ -14,20 +16,22 @@ public class P2 {
             File myObj = new File(args[0]); //file input
             Scanner myReader = new Scanner(myObj);
             numJobs = myReader.nextInt(); //Read number of jobs
-            System.out.println(numJobs);
+            printer.setNumJobs(numJobs);
             while(myReader.hasNext()) {
                 jobID = myReader.next();
                 pageCount = Integer.parseInt(myReader.next());
-               //     Job newJob = new Job(jobID, pageCount);
-              //     newJob.start();
-                System.out.println(jobID + " " + pageCount);
+                Job newJob = new Job(jobID, pageCount,printer);
+                newJob.start();
+                Thread.sleep(15);
                 }
             myReader.close();
         } catch (Exception e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
+
     }
+
 
 }
  

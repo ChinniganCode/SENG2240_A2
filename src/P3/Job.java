@@ -17,21 +17,51 @@ public class Job extends Thread {
     public void run() {
         while (isComplete == false) {
             if(jobID.charAt(0) == 'M') {
-                try {
-                    printer.acquireMonoSem(this);
+                printer.acquireTurnstile();
+                printer.lockMono();
+                printer.releaseTurnstile();
+                printer.acquireMono();
+                printer.incCurrHead();
+                int arrTime = printer.getTime();
+                System.out.println("(" + arrTime + ") " + getJobID() + " uses head " + printer.getCurrHead() + " (time: " + getNumPages() + ")");
+                for(int i = 0; i < getNumPages(); i++) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                isComplete = true;
+                printer.releaseMono();
+                printer.decCurrHead();
+                printer.setTime(numPages+ arrTime);
+                printer.unlockMono();
 
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+
             } else {
-                try {
-                    printer.acquireColourSem(this);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                printer.acquireTurnstile();
+                printer.lockColour();
+                printer.releaseTurnstile();
+                printer.acquireColour();
+                printer.incCurrHead();
+                int arrTime = printer.getTime();
+                System.out.println("(" + arrTime + ") " + getJobID() + " uses head " + printer.getCurrHead() + " (time: " + getNumPages() + ")");
+                for(int i = 0; i < getNumPages(); i++) {
+                    try {
+                        Thread.sleep(1000);
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
+                isComplete = true;
+                printer.releaseColour();
+                printer.decCurrHead();
+                printer.setTime(numPages+ arrTime);
+                printer.unlockColour();
             }
         }
-        }
+    }
     public String getJobID() {
         return jobID;
     }

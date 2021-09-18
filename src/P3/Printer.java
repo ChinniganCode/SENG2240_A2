@@ -33,13 +33,57 @@ public class Printer {
         time = 0;
         lastTime = 0;
     }
+
+    public void acquireTurnstile() {
+        try {
+            turnstile.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    public void lockColour() {
+        colourSwitch.lock(empty);
+    }
+
+    public void unlockColour() {
+        colourSwitch.unlock(empty);
+    }
+    public void lockMono() {
+        monoSwitch.lock(empty);
+    }
+
+    public void unlockMono() {
+        monoSwitch.unlock(empty);
+    }
+    public void releaseTurnstile() {
+        turnstile.release();
+    }
+    public void acquireColour() {
+        try {
+            colourMultiplex.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    public void releaseColour() {
+        colourMultiplex.release();
+    }
+    public void acquireMono() {
+        try {
+            monoMultiplex.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    public void releaseMono() {
+        monoMultiplex.release();
+    }
     public void acquireColourSem(Job job) throws InterruptedException {
         turnstile.acquire();
         colourSwitch.lock(empty);
         turnstile.release();
         colourMultiplex.acquire();
         currHead++;
-        time += lastTime;
         System.out.println("(" + time + ") " + job.getJobID() + " uses head " + currHead + " (time: " + job.getNumPages() + ")");
         for(int i = 0; i < job.getNumPages(); i++) {
             try {
@@ -85,6 +129,12 @@ public class Printer {
     }
     public int getCurrHead() {
         return currHead;
+    }
+    public int getTime() {
+        return time;
+    }
+    public void setTime(int data) {
+        time = data;
     }
 
 

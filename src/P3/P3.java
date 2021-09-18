@@ -22,8 +22,8 @@ public class P3 {
                 pageCount = Integer.parseInt(myReader.next());
                 Job newJob = new Job(jobID, pageCount,printer);
                 newJob.start();
-                Thread.sleep(100);
                 }
+            Thread.sleep(10);
             myReader.close();
         } catch (Exception e) {
             System.out.println("An error occurred.");

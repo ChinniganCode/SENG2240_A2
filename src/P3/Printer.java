@@ -4,91 +4,113 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Printer {
-    private AtomicInteger time;
-    private Semaphore noOfHeadsSem;
-    private Semaphore modeSem;
-    private Semaphore colourLock;
-    private Semaphore monoLock;
+    private int time;
+    private Semaphore empty;
+    private LightSwitch colourSwitch;
+    private LightSwitch monoSwitch;
+    private Semaphore colourMultiplex;
+    private Semaphore monoMultiplex;
+    private Semaphore turnstile;
+    private Semaphore updateTime;
     private char mode;
     private int numJobs;
     private int jobsCompleted;
-    private AtomicInteger currHead;
-    private int highest;
+    private int currHead;
+    private int lastTime;
 
     public Printer() {
-
-        noOfHeadsSem = new Semaphore(3, true);
-        modeSem = new Semaphore(1, true);
-        colourLock = new Semaphore(1, true);
-        monoLock = new Semaphore(1, true);
+        empty = new Semaphore(1);
+        colourSwitch = new LightSwitch();
+        monoSwitch = new LightSwitch();
+        colourMultiplex = new Semaphore (3);
+        monoMultiplex = new Semaphore(3);
+        turnstile = new Semaphore(1);
+        updateTime = new Semaphore(0);
         numJobs = 0;
         jobsCompleted = 0;
         mode = 'Z';
-        currHead = new AtomicInteger(0);
-        time = new AtomicInteger(0);
-        highest = 0;
+        currHead = 0;
+        time = 0;
+        lastTime = 0;
     }
-    public void setHighest(int hi) {
-        if(hi > highest) {
-            highest = hi;
-        }
-    }
-    public void acquireSem(Job job) {
-        acquireModeSem(job);
-        printJob(job);
-        releaseModeSem(job);
-    }
-    public void acquireModeSem(Job job) {
-        if(currHead.get() == 0) { //if printer is empty, change mode
+    public void acquireColourSem(Job job) throws InterruptedException {
+        turnstile.acquire();
+        colourSwitch.lock(empty);
+        turnstile.release();
+        colourMultiplex.acquire();
+        currHead++;
+        time += lastTime;
+        System.out.println("(" + time + ") " + job.getJobID() + " uses head " + currHead + " (time: " + job.getNumPages() + ")");
+        for(int i = 0; i < job.getNumPages(); i++) {
             try {
-                modeSem.acquire();
-                System.out.println("Printer empty");
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            mode = job.getJobID().charAt(0);
         }
-        if(job.getJobID().charAt(0) != mode && currHead.get() != 3) { //if current mode is different, change mode
+        job.setComplete();
+        colourMultiplex.release();
+        currHead--;
+        lastTime = job.getNumPages();
+        System.out.println("Job " + job.getJobID() + " done" + " time " + (time + lastTime));
+        colourSwitch.unlock(empty);
+    }
+    public void acquireMonoSem(Job job) throws InterruptedException {
+        turnstile.acquire();
+        monoSwitch.lock(empty);
+        turnstile.release();
+        monoMultiplex.acquire();
+        currHead++;
+        System.out.println("(" + (time + lastTime) + ") " + job.getJobID() + " uses head " + currHead + " (time: " + job.getNumPages() + ")");
+        for(int i = 0; i < job.getNumPages(); i++) {
             try {
-                modeSem.acquire();
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            mode = job.getJobID().charAt(0);
         }
+        job.setComplete();
+        monoMultiplex.release();
+        currHead--;
+        lastTime = job.getNumPages();
+        System.out.println("Job " + job.getJobID() + " done" + " time " + (time + lastTime));
+        monoSwitch.unlock(empty);
+    }
+
+    public void incCurrHead() {
+        currHead++;
+    }
+    public void decCurrHead() {
+        currHead--;
+    }
+    public int getCurrHead() {
+        return currHead;
+    }
 
 
-    }
-    public void releaseModeSem(Job job) {
-        if(currHead.get() == 0) {
-            modeSem.release();
-            mode = 'Z';
-           // System.out.println("ModeSem Released");
-        }
-    }
-    public void printJob(Job job) {
-            try {
-                noOfHeadsSem.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            currHead.incrementAndGet();
-            setHighest(job.getNumPages());
-            System.out.println("(" + time + ") " + job.getJobID() + " uses head " + currHead + " (time: " + job.getNumPages() + ")");
-            for(int i = 0; i < job.getNumPages(); i++) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            noOfHeadsSem.release();
-            currHead.decrementAndGet();
-            time.set(highest + time.get());
-            highest = 0;
-            job.setComplete();
-            // System.out.println("Job " + job.getJobID() + " done");
-    }
+//    public void printJob(Job job) {
+//            try {
+//                noOfHeadsSem.acquire();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            currHead.incrementAndGet();
+//            setHighest(job.getNumPages());
+//            System.out.println("(" + time + ") " + job.getJobID() + " uses head " + currHead + " (time: " + job.getNumPages() + ")");
+//            for(int i = 0; i < job.getNumPages(); i++) {
+//                try {
+//                    Thread.sleep(100);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            noOfHeadsSem.release();
+//            currHead.decrementAndGet();
+//            time.set(highest + time.get());
+//            highest = 0;
+//            job.setComplete();
+//            // System.out.println("Job " + job.getJobID() + " done");
+//    }
 
     public char getMode() {
         return mode;

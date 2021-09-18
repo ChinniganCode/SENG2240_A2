@@ -15,7 +15,22 @@ public class Job extends Thread {
 
     @Override
     public void run() {
-            printer.acquireSem(this);
+        while (isComplete == false) {
+            if(jobID.charAt(0) == 'M') {
+                try {
+                    printer.acquireMonoSem(this);
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    printer.acquireColourSem(this);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         }
     public String getJobID() {
         return jobID;

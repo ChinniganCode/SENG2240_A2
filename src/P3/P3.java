@@ -22,7 +22,7 @@ public class P3 {
                 pageCount = Integer.parseInt(myReader.next());
                 Job newJob = new Job(jobID, pageCount,printer);
                 newJob.start();
-                Thread.sleep(15);
+                Thread.sleep(100);
                 }
             myReader.close();
         } catch (Exception e) {

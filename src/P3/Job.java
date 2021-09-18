@@ -15,9 +15,7 @@ public class Job extends Thread {
 
     @Override
     public void run() {
-        while (printer.getJobsCompleted() < printer.getNumJobs() && isComplete == false) {
             printer.acquireSem(this);
-            }
         }
     public String getJobID() {
         return jobID;

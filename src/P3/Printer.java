@@ -7,6 +7,8 @@ public class Printer {
     private AtomicInteger time;
     private Semaphore noOfHeadsSem;
     private Semaphore modeSem;
+    private Semaphore colourLock;
+    private Semaphore monoLock;
     private char mode;
     private int numJobs;
     private int jobsCompleted;
@@ -17,6 +19,8 @@ public class Printer {
 
         noOfHeadsSem = new Semaphore(3, true);
         modeSem = new Semaphore(1, true);
+        colourLock = new Semaphore(1, true);
+        monoLock = new Semaphore(1, true);
         numJobs = 0;
         jobsCompleted = 0;
         mode = 'Z';

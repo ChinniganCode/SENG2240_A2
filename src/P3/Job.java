@@ -1,24 +1,32 @@
 package P3;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class Job extends Thread {
     private String jobID;
     private int numPages;
     private Printer printer;
-    private boolean isComplete;
 
     public Job(String JobID, int numPages, Printer printer) {
         this.jobID = JobID;
         this.numPages = numPages;
         this.printer = printer;
-        isComplete = false;
     }
 
     @Override
-    public void run() {
-        while (isComplete == false) {
+    public void run() { //remove clunky repeated code
+            Matcher matcher = Pattern.compile("\\d+").matcher(jobID);
+            matcher.find();
+            int jobNum = Integer.valueOf(matcher.group());
             if(jobID.charAt(0) == 'M') {
                 printer.acquireTurnstile();
                 printer.lockMono();
+                try {
+                    Thread.sleep(jobNum*2);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 printer.releaseTurnstile();
                 printer.acquireMono();
                 printer.incCurrHead();
@@ -31,7 +39,7 @@ public class Job extends Thread {
                         e.printStackTrace();
                     }
                 }
-                isComplete = true;
+                printer.incJobsCompleted();
                 printer.releaseMono();
                 printer.decCurrHead();
                 printer.setTime(numPages+ arrTime);
@@ -40,6 +48,11 @@ public class Job extends Thread {
 
             } else {
                 printer.acquireTurnstile();
+                try {
+                    Thread.sleep(jobNum*2);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 printer.lockColour();
                 printer.releaseTurnstile();
                 printer.acquireColour();
@@ -54,22 +67,23 @@ public class Job extends Thread {
                         e.printStackTrace();
                     }
                 }
-                isComplete = true;
+                printer.incJobsCompleted();
                 printer.releaseColour();
                 printer.decCurrHead();
                 printer.setTime(numPages+ arrTime);
                 printer.unlockColour();
+
             }
+        if(printer.getJobsCompleted() >= printer.getNumJobs()) {
+            System.out.println("(" + printer.getTime() +")" + " DONE");
+            return;
         }
-    }
+        }
     public String getJobID() {
         return jobID;
     }
     public int getNumPages() {
         return numPages;
-    }
-    public void setComplete() {
-        isComplete = true;
     }
 }
 

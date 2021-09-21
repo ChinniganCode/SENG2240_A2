@@ -1,37 +1,34 @@
 package P3;
 
+import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Printer {
     private int time;
     private Semaphore empty;
-    private LightSwitch colourSwitch;
-    private LightSwitch monoSwitch;
     private Semaphore colourMultiplex;
     private Semaphore monoMultiplex;
     private Semaphore turnstile;
-    private Semaphore updateTime;
-    private char mode;
+    private Semaphore monoMutex = new Semaphore(1);
+    private Semaphore colourMutex = new Semaphore(1);
     private int numJobs;
     private int jobsCompleted;
     private int currHead;
-    private int lastTime;
+    private int colourSwitchCounter;
+    private int monoSwitchCounter;
+    private ArrayList<Job> jobList = new ArrayList<Job>();
 
     public Printer() {
         empty = new Semaphore(1);
-        colourSwitch = new LightSwitch();
-        monoSwitch = new LightSwitch();
-        colourMultiplex = new Semaphore (3);
-        monoMultiplex = new Semaphore(3);
+        colourMultiplex = new Semaphore (3, true);
+        monoMultiplex = new Semaphore(3, true);
         turnstile = new Semaphore(1);
-        updateTime = new Semaphore(0);
         numJobs = 0;
         jobsCompleted = 0;
-        mode = 'Z';
         currHead = 0;
         time = 0;
-        lastTime = 0;
+        colourSwitchCounter = 0;
+        monoSwitchCounter = 0;
     }
 
     public void acquireTurnstile() {
@@ -41,19 +38,59 @@ public class Printer {
             e.printStackTrace();
         }
     }
-    public void lockColour() {
-        colourSwitch.lock(empty);
-    }
 
-    public void unlockColour() {
-        colourSwitch.unlock(empty);
+    public void lockColour(){
+        try {
+            colourMutex.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        ++colourSwitchCounter;
+        if(colourSwitchCounter == 1) {
+            try {
+                empty.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        colourMutex.release();
     }
-    public void lockMono() {
-        monoSwitch.lock(empty);
+    public void unlockColour() {
+        try {
+            colourMutex.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        --colourSwitchCounter;
+        if(colourSwitchCounter == 0) empty.release();
+        colourMutex.release();
+    }
+    public void lockMono(){
+        try {
+            monoMutex.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        ++monoSwitchCounter;
+        if(monoSwitchCounter == 1) {
+            try {
+                empty.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        monoMutex.release();
     }
 
     public void unlockMono() {
-        monoSwitch.unlock(empty);
+        try {
+            monoMutex.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        --monoSwitchCounter;
+        if(monoSwitchCounter == 0) empty.release();
+        monoMutex.release();
     }
     public void releaseTurnstile() {
         turnstile.release();
@@ -78,49 +115,6 @@ public class Printer {
     public void releaseMono() {
         monoMultiplex.release();
     }
-    public void acquireColourSem(Job job) throws InterruptedException {
-        turnstile.acquire();
-        colourSwitch.lock(empty);
-        turnstile.release();
-        colourMultiplex.acquire();
-        currHead++;
-        System.out.println("(" + time + ") " + job.getJobID() + " uses head " + currHead + " (time: " + job.getNumPages() + ")");
-        for(int i = 0; i < job.getNumPages(); i++) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        job.setComplete();
-        colourMultiplex.release();
-        currHead--;
-        lastTime = job.getNumPages();
-        System.out.println("Job " + job.getJobID() + " done" + " time " + (time + lastTime));
-        colourSwitch.unlock(empty);
-    }
-    public void acquireMonoSem(Job job) throws InterruptedException {
-        turnstile.acquire();
-        monoSwitch.lock(empty);
-        turnstile.release();
-        monoMultiplex.acquire();
-        currHead++;
-        System.out.println("(" + (time + lastTime) + ") " + job.getJobID() + " uses head " + currHead + " (time: " + job.getNumPages() + ")");
-        for(int i = 0; i < job.getNumPages(); i++) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        job.setComplete();
-        monoMultiplex.release();
-        currHead--;
-        lastTime = job.getNumPages();
-        System.out.println("Job " + job.getJobID() + " done" + " time " + (time + lastTime));
-        monoSwitch.unlock(empty);
-    }
-
     public void incCurrHead() {
         currHead++;
     }
@@ -136,50 +130,15 @@ public class Printer {
     public void setTime(int data) {
         time = data;
     }
-
-
-//    public void printJob(Job job) {
-//            try {
-//                noOfHeadsSem.acquire();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            currHead.incrementAndGet();
-//            setHighest(job.getNumPages());
-//            System.out.println("(" + time + ") " + job.getJobID() + " uses head " + currHead + " (time: " + job.getNumPages() + ")");
-//            for(int i = 0; i < job.getNumPages(); i++) {
-//                try {
-//                    Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            noOfHeadsSem.release();
-//            currHead.decrementAndGet();
-//            time.set(highest + time.get());
-//            highest = 0;
-//            job.setComplete();
-//            // System.out.println("Job " + job.getJobID() + " done");
-//    }
-
-    public char getMode() {
-        return mode;
-    }
     public void setNumJobs(int numJobs) {
         this.numJobs = numJobs;
     }
-    public int getNumJobs() {
-        return numJobs;
-    }
-
+    public int getNumJobs() { return numJobs; }
     public void incJobsCompleted() {
         jobsCompleted++;
     }
     public int getJobsCompleted() {
         return jobsCompleted;
-    }
-    public void setMode(char mode) {
-        this.mode = mode;
     }
 
 }

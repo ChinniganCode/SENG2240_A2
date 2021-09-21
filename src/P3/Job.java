@@ -20,13 +20,8 @@ public class Job extends Thread {
         Matcher matcher = Pattern.compile("\\d+").matcher(jobID);
         matcher.find();
         int jobNum = Integer.valueOf(matcher.group());
-
         printer.acquireTurnstile();
-        if (jobType == 'M') {
-            printer.lockMono();
-        } else {
-            printer.lockColour();
-        }
+        printer.lock(jobType);
         //inserts a small delay based on job number, potentially bad practice (i.e. slower systems)
         try {
             Thread.sleep(jobNum * 2);
@@ -34,12 +29,7 @@ public class Job extends Thread {
             e.printStackTrace();
         }
         printer.releaseTurnstile();
-
-        if (jobType == 'M') {
-            printer.acquireMono();
-        } else {
-            printer.acquireColour();
-        }
+        printer.acquireSem(jobType);
         printer.incCurrHead();
         int arrTime = printer.getTime();
         System.out.println("(" + arrTime + ") " + getJobID() + " uses head " + printer.getCurrHead() + " (time: " + getNumPages() + ")");
@@ -51,18 +41,10 @@ public class Job extends Thread {
             }
         }
         printer.incJobsCompleted();
-        if (jobType == 'M') {
-            printer.releaseMono();
-        } else {
-            printer.releaseColour();
-        }
+        printer.releaseSem(jobType);
         printer.decCurrHead();
         printer.setTime(numPages + arrTime);
-        if (jobType == 'M') {
-            printer.unlockMono();
-        } else {
-            printer.unlockColour();
-        }
+        printer.unlock(jobType);
         if (printer.getJobsCompleted() >= printer.getNumJobs()) {
             System.out.println("(" + printer.getTime() + ")" + " DONE");
             return;

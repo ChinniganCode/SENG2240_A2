@@ -1,27 +1,25 @@
 package P3;
 
-import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 public class Printer {
     private int time;
     private Semaphore empty;
-    private Semaphore colourMultiplex;
-    private Semaphore monoMultiplex;
+    private Semaphore colourSem;
+    private Semaphore monoSem;
     private Semaphore turnstile;
-    private Semaphore monoMutex = new Semaphore(1);
-    private Semaphore colourMutex = new Semaphore(1);
+    private Semaphore monoLock = new Semaphore(1);
+    private Semaphore colourLock = new Semaphore(1);
     private int numJobs;
     private int jobsCompleted;
     private int currHead;
     private int colourSwitchCounter;
     private int monoSwitchCounter;
-    private ArrayList<Job> jobList = new ArrayList<Job>();
 
     public Printer() {
         empty = new Semaphore(1);
-        colourMultiplex = new Semaphore(3, true);
-        monoMultiplex = new Semaphore(3, true);
+        colourSem = new Semaphore(3, true);
+        monoSem = new Semaphore(3, true);
         turnstile = new Semaphore(1);
         numJobs = 0;
         jobsCompleted = 0;
@@ -39,84 +37,21 @@ public class Printer {
         }
     }
 
-    public void lockColour() {
-        try {
-            colourMutex.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        ++colourSwitchCounter;
-        if (colourSwitchCounter == 1) {
-            try {
-                empty.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        colourMutex.release();
-    }
-
-    public void unlockColour() {
-        try {
-            colourMutex.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        --colourSwitchCounter;
-        if (colourSwitchCounter == 0) empty.release();
-        colourMutex.release();
-    }
-
-    public void lockMono() {
-        try {
-            monoMutex.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        ++monoSwitchCounter;
-        if (monoSwitchCounter == 1) {
-            try {
-                empty.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        monoMutex.release();
-    }
-
-    public void unlockMono() {
-        try {
-            monoMutex.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        --monoSwitchCounter;
-        if (monoSwitchCounter == 0) empty.release();
-        monoMutex.release();
-    }
-
     public void releaseTurnstile() {
         turnstile.release();
     }
 
-    public void acquireColour() {
-        try {
-            colourMultiplex.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
     public void acquireSem(char type) {
         if (type == 'M') {
             try {
-                monoMultiplex.acquire();
+                monoSem.acquire();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         } else {
             if (type == 'C') {
                 try {
-                    colourMultiplex.acquire();
+                    colourSem.acquire();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -126,7 +61,7 @@ public class Printer {
     public void lock(char type) {
         if (type == 'M') {
             try {
-                monoMutex.acquire();
+                monoLock.acquire();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -138,10 +73,10 @@ public class Printer {
                     e.printStackTrace();
                 }
             }
-            monoMutex.release();
+            monoLock.release();
         } else {
             try {
-                colourMutex.acquire();
+                colourLock.acquire();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -153,53 +88,37 @@ public class Printer {
                     e.printStackTrace();
                 }
             }
-            colourMutex.release();
+            colourLock.release();
         }
     }
     public void unlock(char type) {
         if (type == 'M') {
             try {
-                monoMutex.acquire();
+                monoLock.acquire();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             --monoSwitchCounter;
             if (monoSwitchCounter == 0) empty.release();
-            monoMutex.release();
+            monoLock.release();
         } else {
                 try {
-                    colourMutex.acquire();
+                    colourLock.acquire();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 --colourSwitchCounter;
                 if (colourSwitchCounter == 0) empty.release();
-                colourMutex.release();
+                colourLock.release();
             }
         }
 
     public void releaseSem(char type) {
         if(type == 'M') {
-            monoMultiplex.release();
+            monoSem.release();
         } else {
-            colourMultiplex.release();
+            colourSem.release();
         }
-    }
-
-    public void releaseColour() {
-        colourMultiplex.release();
-    }
-
-    public void acquireMono() {
-        try {
-            monoMultiplex.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void releaseMono() {
-        monoMultiplex.release();
     }
 
     public void incCurrHead() {

@@ -35,7 +35,6 @@ public class WAR extends Thread {
             intersection.printCount();
             intersection.releaseSem();
         }
-   //     System.exit(0);
     }
 
 

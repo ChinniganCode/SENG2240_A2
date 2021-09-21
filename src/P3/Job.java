@@ -16,74 +16,66 @@ public class Job extends Thread {
 
     @Override
     public void run() { //remove clunky repeated code
-            Matcher matcher = Pattern.compile("\\d+").matcher(jobID);
-            matcher.find();
-            int jobNum = Integer.valueOf(matcher.group());
-            if(jobID.charAt(0) == 'M') {
-                printer.acquireTurnstile();
-                printer.lockMono();
-                try {
-                    Thread.sleep(jobNum*2);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                printer.releaseTurnstile();
-                printer.acquireMono();
-                printer.incCurrHead();
-                int arrTime = printer.getTime();
-                System.out.println("(" + arrTime + ") " + getJobID() + " uses head " + printer.getCurrHead() + " (time: " + getNumPages() + ")");
-                for(int i = 0; i < getNumPages(); i++) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                printer.incJobsCompleted();
-                printer.releaseMono();
-                printer.decCurrHead();
-                printer.setTime(numPages+ arrTime);
-                printer.unlockMono();
+        char jobType = jobID.charAt(0);
+        Matcher matcher = Pattern.compile("\\d+").matcher(jobID);
+        matcher.find();
+        int jobNum = Integer.valueOf(matcher.group());
 
+        printer.acquireTurnstile();
+        if (jobType == 'M') {
+            printer.lockMono();
+        } else {
+            printer.lockColour();
+        }
+        //inserts a small delay based on job number, potentially bad practice (i.e. slower systems)
+        try {
+            Thread.sleep(jobNum * 2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        printer.releaseTurnstile();
 
-            } else {
-                printer.acquireTurnstile();
-                try {
-                    Thread.sleep(jobNum*2);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                printer.lockColour();
-                printer.releaseTurnstile();
-                printer.acquireColour();
-                printer.incCurrHead();
-                int arrTime = printer.getTime();
-                System.out.println("(" + arrTime + ") " + getJobID() + " uses head " + printer.getCurrHead() + " (time: " + getNumPages() + ")");
-                for(int i = 0; i < getNumPages(); i++) {
-                    try {
-                        Thread.sleep(1000);
-
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                printer.incJobsCompleted();
-                printer.releaseColour();
-                printer.decCurrHead();
-                printer.setTime(numPages+ arrTime);
-                printer.unlockColour();
-
+        if (jobType == 'M') {
+            printer.acquireMono();
+        } else {
+            printer.acquireColour();
+        }
+        printer.incCurrHead();
+        int arrTime = printer.getTime();
+        System.out.println("(" + arrTime + ") " + getJobID() + " uses head " + printer.getCurrHead() + " (time: " + getNumPages() + ")");
+        for (int i = 0; i < getNumPages(); i++) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        if(printer.getJobsCompleted() >= printer.getNumJobs()) {
-            System.out.println("(" + printer.getTime() +")" + " DONE");
+        }
+        printer.incJobsCompleted();
+        if (jobType == 'M') {
+            printer.releaseMono();
+        } else {
+            printer.releaseColour();
+        }
+        printer.decCurrHead();
+        printer.setTime(numPages + arrTime);
+        if (jobType == 'M') {
+            printer.unlockMono();
+        } else {
+            printer.unlockColour();
+        }
+        if (printer.getJobsCompleted() >= printer.getNumJobs()) {
+            System.out.println("(" + printer.getTime() + ")" + " DONE");
             return;
         }
-        }
+    }
+
     public String getJobID() {
         return jobID;
     }
+
     public int getNumPages() {
         return numPages;
     }
 }
+
 

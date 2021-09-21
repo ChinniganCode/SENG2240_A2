@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 public class P3 {
     public static Printer printer = new Printer();
+
     public static void main(String[] args) {
         int numJobs;
         String jobID;
@@ -14,13 +15,13 @@ public class P3 {
             Scanner myReader = new Scanner(myObj);
             numJobs = myReader.nextInt(); //Read number of jobs
             printer.setNumJobs(numJobs);
-            while(myReader.hasNext()) {
+            while (myReader.hasNext()) {
                 jobID = myReader.next();
                 pageCount = Integer.parseInt(myReader.next());
-                Job newJob = new Job(jobID, pageCount,printer);
+                Job newJob = new Job(jobID, pageCount, printer);
                 newJob.start();
-                Thread.sleep(100);
-                }
+                Thread.sleep(100); //inserts delay to enforce serialization
+            }
             myReader.close();
         } catch (Exception e) {
             System.out.println("An error occurred.");

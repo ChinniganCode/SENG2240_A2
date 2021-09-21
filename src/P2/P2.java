@@ -1,12 +1,11 @@
 package P2;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class P2 {
     public static Printer printer = new Printer();
-    public static ArrayList<Job> jobList = new ArrayList<Job>();
+
     public static void main(String[] args) {
         int numJobs;
         String jobID;
@@ -16,13 +15,12 @@ public class P2 {
             Scanner myReader = new Scanner(myObj);
             numJobs = myReader.nextInt(); //Read number of jobs
             printer.setNumJobs(numJobs);
-            while(myReader.hasNext()) {
+            while (myReader.hasNext()) {
                 jobID = myReader.next();
                 pageCount = Integer.parseInt(myReader.next());
-                Job newJob = new Job(jobID, pageCount,printer);
-                jobList.add(newJob);
+                Job newJob = new Job(jobID, pageCount, printer);
                 newJob.start();
-                Thread.sleep(10);
+                Thread.sleep(100);
             }
             myReader.close();
         } catch (Exception e) {
@@ -33,5 +31,6 @@ public class P2 {
 
 
 }
+
 
  

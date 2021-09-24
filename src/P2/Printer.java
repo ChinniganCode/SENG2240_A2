@@ -2,139 +2,108 @@ package P2;
 
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Printer {
     private int time;
-    private Semaphore empty;
-    private Semaphore colourMultiplex;
-    private Semaphore monoMultiplex;
-    private Semaphore turnstile;
-    private Semaphore monoMutex = new Semaphore(1);
-    private Semaphore colourMutex = new Semaphore(1);
     private int numJobs;
     private int jobsCompleted;
     private int currHead;
-    private int colourSwitchCounter;
-    private int monoSwitchCounter;
-    private ArrayList<Job> jobList = new ArrayList<Job>();
+    private char jobType;
+    private ArrayList<Job> jobList = new ArrayList<>();
+    private ArrayList<Job> current = new ArrayList<>();
+    private ReentrantLock lock = new ReentrantLock();
 
     public Printer() {
-        empty = new Semaphore(1);
-        colourMultiplex = new Semaphore(3, true);
-        monoMultiplex = new Semaphore(3, true);
-        turnstile = new Semaphore(1);
         numJobs = 0;
         jobsCompleted = 0;
         currHead = 0;
         time = 0;
-        colourSwitchCounter = 0;
-        monoSwitchCounter = 0;
+        jobType = 'Z';
     }
-
-    public void acquireTurnstile() {
-        try {
-            turnstile.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public boolean checkLine(Job job) {
+        if(jobList.get(0).getJobID().equals(job.getJobID())) {
+            return true;
+        } else {
+            return false;
         }
     }
 
-    public void lockColour() {
+    public  Job getListHead() {
+        return jobList.get(0);
+    }
+
+
+    public void addJob(Job job) {
+        this.lock.lock();
         try {
-            colourMutex.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        ++colourSwitchCounter;
-        if (colourSwitchCounter == 1) {
-            try {
-                empty.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if(this.current.isEmpty()) {
+                jobType = job.getJobID().charAt(0);
             }
-        }
-        colourMutex.release();
-    }
-
-    public void unlockColour() {
-        try {
-            colourMutex.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        --colourSwitchCounter;
-        if (colourSwitchCounter == 0) empty.release();
-        colourMutex.release();
-    }
-
-    public void lockMono() {
-        try {
-            monoMutex.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        ++monoSwitchCounter;
-        if (monoSwitchCounter == 1) {
-            try {
-                empty.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if(this.current.size() < 3
+                    && !this.current.contains(job)
+                    && this.jobType == job.getJobID().charAt(0)) {
+                current.add(job);
+                System.out.println("(" + time + ") " + job.getJobID() + " uses head " + current.size() + " (time: " + job.getNumPages() + ")");
+                job.runJob();
             }
+        } finally {
+            this.lock.unlock();
         }
-        monoMutex.release();
     }
-
-    public void unlockMono() {
+    public void removeJob(Job job) {
+        this.lock.lock();
         try {
-            monoMutex.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        --monoSwitchCounter;
-        if (monoSwitchCounter == 0) empty.release();
-        monoMutex.release();
-    }
-
-    public void releaseTurnstile() {
-        turnstile.release();
-    }
-
-    public void acquireColour() {
-        try {
-            colourMultiplex.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            if(!this.current.isEmpty()) {
+                jobType = job.getJobID().charAt(0);
+                this.current.remove(job);
+            }
+            if(this.current.isEmpty()) {
+                this.jobType = 'Z';
+            }
+        } finally {
+            this.lock.unlock();
         }
     }
 
-    public void releaseColour() {
-        colourMultiplex.release();
-    }
 
-    public void acquireMono() {
-        try {
-            monoMultiplex.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public  void setJobType(char type) {
+        jobType = type;
     }
-
-    public void releaseMono() {
-        monoMultiplex.release();
+    public  void removeHead() {
+        jobList.remove(0);
     }
-
-    public void incCurrHead() {
+    public  void incCurrHead() {
         currHead++;
     }
 
-    public void decCurrHead() {
+    public  void decCurrHead() {
         currHead--;
+    }
+
+    public char getJobType() {
+        return jobType;
     }
 
     public int getCurrHead() {
         return currHead;
     }
-
+    public boolean isFull() {
+        if(this.current.size() == 3) {
+            return true;
+        } else
+            return false;
+    }
+    public boolean isEmpty() {
+        return this.current.isEmpty();
+    }
+    public boolean isUsing(Job job) {
+        if(current.contains(job)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     public int getTime() {
         return time;
     }
@@ -155,5 +124,8 @@ public class Printer {
 
     public int getJobsCompleted() {
         return jobsCompleted;
+    }
+    public void setJobList(ArrayList<Job> jobs) {
+        jobList = jobs;
     }
 }

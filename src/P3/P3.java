@@ -28,7 +28,5 @@ public class P3 {
             e.printStackTrace();
         }
     }
-
-
 }
  

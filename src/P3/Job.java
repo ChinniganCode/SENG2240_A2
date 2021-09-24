@@ -19,21 +19,21 @@ public class Job extends Thread {
         char jobType = jobID.charAt(0);
         Matcher matcher = Pattern.compile("\\d+").matcher(jobID);
         matcher.find();
-        int jobNum = Integer.valueOf(matcher.group());
-        printer.acquireTurnstile();
-        printer.lock(jobType);
+        int jobNum = Integer.valueOf(matcher.group()); //finds job number
+        printer.acquireTurnstile(); //allows one job in at a time
+        printer.lock(jobType); //locks jobtype to the first job specified
         //inserts a small delay based on job number, potentially bad practice (i.e. slower systems)
         try {
             Thread.sleep(jobNum * 2);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        printer.releaseTurnstile();
-        printer.acquireSem(jobType);
+        printer.releaseTurnstile(); //releases turnstile, allowing next job to enter
+        printer.acquireSem(jobType); //
         printer.incCurrHead();
         int arrTime = printer.getTime();
-        System.out.println("(" + arrTime + ") " + getJobID() + " uses head " + printer.getCurrHead() + " (time: " + getNumPages() + ")");
-        for (int i = 0; i < getNumPages(); i++) {
+        System.out.println("(" + arrTime + ") " + jobID + " uses head " + printer.getCurrHead() + " (time: " + numPages + ")");
+        for (int i = 0; i < numPages; i++) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -50,14 +50,7 @@ public class Job extends Thread {
             return;
         }
     }
-
-    public String getJobID() {
-        return jobID;
-    }
-
-    public int getNumPages() {
-        return numPages;
-    }
 }
+
 
 

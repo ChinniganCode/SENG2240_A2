@@ -9,20 +9,22 @@ public class Printer {
     private int time;
     private int numJobs;
     private int jobsCompleted;
-    private int currHead;
     private ArrayList<Job> jobList = new ArrayList<>();
     private boolean colourLock;
     private boolean monoLock;
+    public boolean empty;
     private ArrayList<Integer> headArray = new ArrayList<>(List.of(1,2,3));
 
     public Printer() {
         numJobs = 0;
         jobsCompleted = 0;
-        currHead = 0;
         time = 0;
         colourLock = false;
         monoLock = false;
-
+        empty = true;
+    }
+    public ArrayList<Integer> getHeadArray() {
+        return headArray;
     }
     public String getJobList() {
         String o = "";

@@ -22,46 +22,36 @@ public class Job extends Thread {
     }
 
     @Override
-    public synchronized void run() { //remove clunky repeated code
+    public void run() {
         while(!isComplete) {
             if(printer.checkLine(this) && printer.headAvailable()) { // if printer has a spare head && this job is next
                 if(printer.isEmpty()) { //if printer is empty, lock to job type
                     printer.lock(type);
-                }
-                if(!printer.isEmpty()) { //if printer has jobs running
-                    if (!printer.isAllowed(type)) {
-                        while (!isComplete) {
-                            try { Thread.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }
-                            if (printer.isEmpty()) //if printer is empty
-                            {
-                                try { Thread.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }
-                                printer.lock(type);
-                                doJob();
-                                break;
-                            }
+                } else { //if printer has jobs running
+                    if (!printer.isAllowed(type)) { //if wrong job type,wait until empty
+
+                        while (!printer.isEmpty()) {
+                          try { Thread.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); } //should probably use wait() here
                         }
-                    } else if(printer.isAllowed(type))
-                    {
-                        doJob();
+                            printer.lock(type);
+                            doJob();
+                            break;
                     }
-                } else if(printer.isAllowed(type))
-                {
-                    doJob();
                 }
-            }
-            else {
+                doJob();
+            } else { //if its not the jobs turn or if the printer is full
                 try { Thread.sleep(15); } catch (InterruptedException e) { e.printStackTrace(); }
             }
         }
-        if (printer.getJobsCompleted() >= printer.getNumJobs()) {
+        if (printer.getJobsCompleted() >= printer.getNumJobs()) { //checks if all jobs completed
             System.out.println("(" + printer.getTime() + ")" + " DONE");
             return;
         }
     }
 
     public synchronized void doJob() {
-        int arrTime = printer.getTime();
-        headNo = printer.takeHead();
+        int arrTime = printer.getTime(); //keep locals copy of arrival time to prevent incorrect incrementation
+        headNo = printer.takeHead(); //ties heads to an 'object'
         System.out.println("(" + arrTime + ") " + jobID + " uses head " + headNo + " (time: " + numPages + ")");
         printer.removeJob(this);
             try { Thread.sleep(1000 * numPages); } catch (InterruptedException e) { e.printStackTrace(); }

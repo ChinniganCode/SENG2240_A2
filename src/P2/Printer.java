@@ -1,7 +1,6 @@
 package P2;
 
 import java.util.ArrayList;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Printer {
@@ -12,7 +11,9 @@ public class Printer {
     private char jobType;
     private ArrayList<Job> jobList = new ArrayList<>();
     private ArrayList<Job> current = new ArrayList<>();
-    private ReentrantLock lock = new ReentrantLock();
+    private boolean colourLock;
+    private boolean monoLock;
+    private ReentrantLock turnstile;
 
     public Printer() {
         numJobs = 0;
@@ -20,64 +21,63 @@ public class Printer {
         currHead = 0;
         time = 0;
         jobType = 'Z';
+        colourLock = false;
+        monoLock = false;
+        turnstile = new ReentrantLock();
     }
+    public void lockTurnstile() {
+        turnstile.lock();
+    }
+    public void unlockTurnstile() {
+        turnstile.unlock();
+    }
+
+    public void colourLock() {
+        colourLock = true;
+        monoLock = false;
+    }
+    public void monoLock() {
+        colourLock = false;
+        monoLock = true;
+    }
+    public void lock(char type) {
+        if (type == 'M') {
+            colourLock = false;
+            monoLock = true;
+        } else {
+            colourLock = true;
+            monoLock = false;
+        }
+    }
+    public boolean isColourLock() {
+        return colourLock;
+    }
+
+
+    public boolean isMonoLock() {
+        return monoLock;
+    }
+
+
     public boolean checkLine(Job job) {
-        if(jobList.get(0).getJobID().equals(job.getJobID())) {
+        if(jobList.get(0).getJobID() == job.getJobID()) {
             return true;
         } else {
             return false;
         }
     }
-
-    public  Job getListHead() {
-        return jobList.get(0);
-    }
-
-
-    public void addJob(Job job) {
-        this.lock.lock();
-        try {
-            if(this.current.isEmpty()) {
-                jobType = job.getJobID().charAt(0);
-            }
-            if(this.current.size() < 3
-                    && !this.current.contains(job)
-                    && this.jobType == job.getJobID().charAt(0)) {
-                current.add(job);
-                System.out.println("(" + time + ") " + job.getJobID() + " uses head " + current.size() + " (time: " + job.getNumPages() + ")");
-                job.runJob();
-            }
-        } finally {
-            this.lock.unlock();
+    public synchronized void removeJob(Job job) {
+        jobList.remove(job);
         }
-    }
-    public void removeJob(Job job) {
-        this.lock.lock();
-        try {
-            if(!this.current.isEmpty()) {
-                jobType = job.getJobID().charAt(0);
-                this.current.remove(job);
-            }
-            if(this.current.isEmpty()) {
-                this.jobType = 'Z';
-            }
-        } finally {
-            this.lock.unlock();
-        }
-    }
 
-
-    public  void setJobType(char type) {
-        jobType = type;
-    }
     public  void removeHead() {
         jobList.remove(0);
     }
-    public  void incCurrHead() {
+    public void incCurrHead() {
         currHead++;
     }
 
-    public  void decCurrHead() {
+    public void decCurrHead() {
         currHead--;
     }
 
@@ -108,7 +108,7 @@ public class Printer {
         return time;
     }
 
-    public void setTime(int data) {
+    public synchronized void setTime(int data) {
         time = data;
     }
 
@@ -118,7 +118,7 @@ public class Printer {
         this.numJobs = numJobs;
     }
 
-    public void incJobsCompleted() {
+    public synchronized void incJobsCompleted() {
         jobsCompleted++;
     }
 

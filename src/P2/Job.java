@@ -1,7 +1,6 @@
 package P2;
 
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,81 +9,48 @@ public class Job extends Thread {
     private int numPages;
     private Printer printer;
     private boolean isComplete;
-    private boolean isRunning;
     private char type;
-    private ReentrantLock lock;
+    private int headNo;
 
     public Job(String JobID, int numPages, Printer printer) {
         this.jobID = JobID;
         this.numPages = numPages;
         this.printer = printer;
         isComplete = false;
-        isRunning = false;
         type = JobID.charAt(0);
-        lock = new ReentrantLock();
+        headNo = 0;
     }
 
     @Override
     public synchronized void run() { //remove clunky repeated code
-        Matcher matcher = Pattern.compile("\\d+").matcher(jobID);
-        matcher.find();
-        int jobNum = Integer.valueOf(matcher.group()); //finds job number
-        printer.lockTurnstile();
-        try { Thread.sleep(jobNum * 2); } catch (InterruptedException e) { e.printStackTrace(); }
-        printer.unlockTurnstile();
         while(!isComplete) {
-            if(printer.checkLine(this) && printer.getCurrHead() < 3) {
-                if(printer.getCurrHead() == 0) {
+            if(printer.checkLine(this) && printer.headAvailable()) { // if printer has a spare head && this job is next
+                if(printer.isEmpty()) { //if printer is empty, lock to job type
                     printer.lock(type);
                 }
-                if(printer.getCurrHead() > 0) {
-                    if (type == 'M' && printer.isColourLock() == true) {
-                        lock.lock();
-                        while (isComplete == false) {
+                if(!printer.isEmpty()) { //if printer has jobs running
+                    if (!printer.isAllowed(type)) {
+                        while (!isComplete) {
                             try { Thread.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }
-                            if (printer.getCurrHead() == 0)
+                            if (printer.isEmpty()) //if printer is empty
                             {
                                 try { Thread.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }
-                                printer.monoLock();
-                                printer.incCurrHead();
+                                printer.lock(type);
                                 doJob();
-                                lock.unlock();
                                 break;
                             }
                         }
-                    }
-                    else if (type == 'C' && printer.isMonoLock() == true) {
-                   //     System.out.println("TYPE C and M-lock");
-                        lock.lock();
-                        printer.colourLock();
-                        while (isComplete == false) {
-                            try { Thread.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }
-                            if (printer.getCurrHead() == 0) {
-                                try { Thread.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }
-                                printer.colourLock();
-                                printer.incCurrHead();
-                                doJob();
-                                lock.unlock();
-                                break;
-                            }
-                        }
-                    }
-                    else if(type == 'C' && printer.isColourLock()==true || type=='M' && printer.isMonoLock() == true)
+                    } else if(printer.isAllowed(type))
                     {
-                  //      System.out.println("CorrectLock");
-                        printer.incCurrHead();
                         doJob();
                     }
-                }
-                else if(type == 'C' && printer.isColourLock()==true || type=='M' && printer.isMonoLock() == true)
+                } else if(printer.isAllowed(type))
                 {
-                //    System.out.println("CorrectLock");
-                    printer.incCurrHead();
                     doJob();
                 }
             }
             else {
-                try { Thread.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }
+                try { Thread.sleep(15); } catch (InterruptedException e) { e.printStackTrace(); }
             }
         }
         if (printer.getJobsCompleted() >= printer.getNumJobs()) {
@@ -94,39 +60,20 @@ public class Job extends Thread {
     }
 
     public synchronized void doJob() {
-        printer.removeJob(this);
         int arrTime = printer.getTime();
-        System.out.println("(" + arrTime + ") " + jobID + " uses head " + printer.getCurrHead() + " (time: " + numPages + ")");
-        for (int i = 0; i < numPages; i++) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        headNo = printer.takeHead();
+        System.out.println("(" + arrTime + ") " + jobID + " uses head " + headNo + " (time: " + numPages + ")");
+        printer.removeJob(this);
+            try { Thread.sleep(1000 * numPages); } catch (InterruptedException e) { e.printStackTrace(); }
         printer.incJobsCompleted();
-        printer.decCurrHead();
+        printer.releaseHead(headNo);
+        headNo = 0;
         printer.setTime(numPages + arrTime);
         isComplete = true;
-    //   System.out.println("JOB: " + jobID + " DONE " + printer.getTime() + " " + printer.getListHead().getJobID() + " "+ type);
-      //  System.out.println("currHead=" + printer.getCurrHead() + " MonoLock=" + printer.isMonoLock() + " ColourLock = " + printer.isColourLock());
-    }
-
-    public char getType() {
-        return type;
     }
 
     public String getJobID() {
         return jobID;
-    }
-    public int getNumPages() {
-        return numPages;
-    }
-    public boolean isComplete() {
-    return isComplete;
-    }
-    public boolean isRunning() {
-        return isRunning;
     }
 }
 

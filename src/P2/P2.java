@@ -22,7 +22,6 @@ public class P2 {
                 pageCount = Integer.parseInt(myReader.next());
                 Job newJob = new Job(jobID, pageCount, printer);
                 jobList.add(newJob);
-                Thread.sleep(100); //inserts delay to enforce serialization
             }
             myReader.close();
         } catch (Exception e) {

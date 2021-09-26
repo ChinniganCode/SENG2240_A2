@@ -1,6 +1,8 @@
 package P2;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Printer {
@@ -8,37 +10,48 @@ public class Printer {
     private int numJobs;
     private int jobsCompleted;
     private int currHead;
-    private char jobType;
     private ArrayList<Job> jobList = new ArrayList<>();
-    private ArrayList<Job> current = new ArrayList<>();
     private boolean colourLock;
     private boolean monoLock;
-    private ReentrantLock turnstile;
+    private ArrayList<Integer> headArray = new ArrayList<>(List.of(1,2,3));
 
     public Printer() {
         numJobs = 0;
         jobsCompleted = 0;
         currHead = 0;
         time = 0;
-        jobType = 'Z';
         colourLock = false;
         monoLock = false;
-        turnstile = new ReentrantLock();
+
     }
-    public void lockTurnstile() {
-        turnstile.lock();
+    public String getJobList() {
+        String o = "";
+        for(int i =0; i < jobList.size(); i++) {
+            o+=jobList.get(i).getJobID() + " ";
+        }
+        return o;
     }
-    public void unlockTurnstile() {
-        turnstile.unlock();
+    public int takeHead() {
+        return headArray.remove(0);
+    }
+    public void releaseHead(int headNo) {
+        headArray.add(headNo);
     }
 
-    public void colourLock() {
-        colourLock = true;
-        monoLock = false;
-    }
-    public void monoLock() {
-        colourLock = false;
-        monoLock = true;
+    public boolean isAllowed(char type) {
+        if (type == 'M') {
+            if(isMonoLock()) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if(isColourLock()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
     public void lock(char type) {
         if (type == 'M') {
@@ -53,11 +66,9 @@ public class Printer {
         return colourLock;
     }
 
-
     public boolean isMonoLock() {
         return monoLock;
     }
-
 
     public boolean checkLine(Job job) {
         if(jobList.get(0).getJobID() == job.getJobID()) {
@@ -70,39 +81,15 @@ public class Printer {
         jobList.remove(job);
         }
 
-    public  void removeHead() {
-        jobList.remove(0);
-    }
-    public void incCurrHead() {
-        currHead++;
-    }
-
-    public void decCurrHead() {
-        currHead--;
-    }
-
-    public char getJobType() {
-        return jobType;
-    }
-
-    public int getCurrHead() {
-        return currHead;
-    }
-    public boolean isFull() {
-        if(this.current.size() == 3) {
-            return true;
-        } else
+    public boolean headAvailable() {
+        if(headArray.isEmpty()) {
             return false;
+        } else return true;
     }
     public boolean isEmpty() {
-        return this.current.isEmpty();
-    }
-    public boolean isUsing(Job job) {
-        if(current.contains(job)) {
+        if(headArray.size() == 3) {
             return true;
-        } else {
-            return false;
-        }
+        } else return false;
     }
     public int getTime() {
         return time;

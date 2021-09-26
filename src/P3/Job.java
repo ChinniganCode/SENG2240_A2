@@ -33,13 +33,11 @@ public class Job extends Thread {
         printer.incCurrHead();
         int arrTime = printer.getTime();
         System.out.println("(" + arrTime + ") " + jobID + " uses head " + printer.getCurrHead() + " (time: " + numPages + ")");
-        for (int i = 0; i < numPages; i++) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1000 * numPages);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
         printer.incJobsCompleted();
         printer.releaseSem(jobType);
         printer.decCurrHead();

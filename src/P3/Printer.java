@@ -1,5 +1,7 @@
 package P3;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 public class Printer {
@@ -12,9 +14,9 @@ public class Printer {
     private Semaphore colourLock = new Semaphore(1);
     private int numJobs;
     private int jobsCompleted;
-    private int currHead;
     private int colourSwitchCounter;
     private int monoSwitchCounter;
+    private ArrayList<Integer> headArray = new ArrayList<>(List.of(1,2,3));
 
     public Printer() {
         empty = new Semaphore(1);
@@ -23,7 +25,6 @@ public class Printer {
         turnstile = new Semaphore(1);
         numJobs = 0;
         jobsCompleted = 0;
-        currHead = 0;
         time = 0;
         colourSwitchCounter = 0;
         monoSwitchCounter = 0;
@@ -35,6 +36,12 @@ public class Printer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+    public int takeHead() {
+        return headArray.remove(0);
+    }
+    public void releaseHead(int headNo) {
+        headArray.add(headNo);
     }
 
     public void releaseTurnstile() {
@@ -102,16 +109,16 @@ public class Printer {
             if (monoSwitchCounter == 0) empty.release();
             monoLock.release();
         } else {
-                try {
-                    colourLock.acquire();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                --colourSwitchCounter;
-                if (colourSwitchCounter == 0) empty.release();
-                colourLock.release();
+            try {
+                colourLock.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+            --colourSwitchCounter;
+            if (colourSwitchCounter == 0) empty.release();
+            colourLock.release();
         }
+    }
 
     public void releaseSem(char type) {
         if(type == 'M') {
@@ -119,18 +126,6 @@ public class Printer {
         } else {
             colourSem.release();
         }
-    }
-
-    public void incCurrHead() {
-        currHead++;
-    }
-
-    public void decCurrHead() {
-        currHead--;
-    }
-
-    public int getCurrHead() {
-        return currHead;
     }
 
     public int getTime() {

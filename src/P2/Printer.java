@@ -2,8 +2,6 @@ package P2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class Printer {
     private int time;

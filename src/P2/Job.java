@@ -1,9 +1,5 @@
 package P2;
 
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class Job extends Thread {
     private String jobID;
     private int numPages;
@@ -23,24 +19,31 @@ public class Job extends Thread {
 
     @Override
     public void run() {
-        while(!isComplete) {
-            if(printer.checkLine(this) && printer.headAvailable()) { // if printer has a spare head && this job is next
-                if(printer.isEmpty()) { //if printer is empty, lock to job type
+        while (!isComplete) {
+            if (printer.checkLine(this) && printer.headAvailable()) { // if printer has a spare head && this job is next
+                if (printer.isEmpty()) { //if printer is empty, lock to job type
                     printer.lock(type);
                 } else { //if printer has jobs running
                     if (!printer.isAllowed(type)) { //if wrong job type,wait until empty
-
                         while (!printer.isEmpty()) {
-                          try { Thread.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); } //should probably use wait() here
+                            try {
+                                Thread.sleep(1); //should use wait() here instead
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
-                            printer.lock(type);
-                            doJob();
-                            break;
+                        printer.lock(type);
+                        doJob();
+                        break;
                     }
                 }
                 doJob();
             } else { //if its not the jobs turn or if the printer is full
-                try { Thread.sleep(15); } catch (InterruptedException e) { e.printStackTrace(); }
+                try {
+                    Thread.sleep(15);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
         if (printer.getJobsCompleted() >= printer.getNumJobs()) { //checks if all jobs completed
@@ -49,12 +52,16 @@ public class Job extends Thread {
         }
     }
 
-    public synchronized void doJob() {
+    public void doJob() {
         int arrTime = printer.getTime(); //keep locals copy of arrival time to prevent incorrect incrementation
         headNo = printer.takeHead(); //ties heads to an 'object'
         System.out.println("(" + arrTime + ") " + jobID + " uses head " + headNo + " (time: " + numPages + ")");
         printer.removeJob(this);
-            try { Thread.sleep(1000 * numPages); } catch (InterruptedException e) { e.printStackTrace(); }
+        try {
+            Thread.sleep(1000 * numPages);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         printer.incJobsCompleted();
         printer.releaseHead(headNo);
         headNo = 0;

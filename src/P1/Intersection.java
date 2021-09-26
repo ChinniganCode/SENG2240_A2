@@ -14,11 +14,11 @@ public class Intersection {
     }
 
     public void acquireSem() {
-            try {
-                sem.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        try {
+            sem.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
     public void incrementCount(WAR input) {
         if(input.getLocation().contains("1")) {

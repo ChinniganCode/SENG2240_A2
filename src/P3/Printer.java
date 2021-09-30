@@ -9,7 +9,7 @@ public class Printer {
     private Semaphore empty;
     private Semaphore colourSem;
     private Semaphore monoSem;
-    private Semaphore turnstile;
+    private Semaphore entryLock;
     private Semaphore monoLock = new Semaphore(1);
     private Semaphore colourLock = new Semaphore(1);
     private int numJobs;
@@ -22,7 +22,7 @@ public class Printer {
         empty = new Semaphore(1);
         colourSem = new Semaphore(3, true);
         monoSem = new Semaphore(3, true);
-        turnstile = new Semaphore(1);
+        entryLock = new Semaphore(1);
         numJobs = 0;
         jobsCompleted = 0;
         time = 0;
@@ -30,9 +30,9 @@ public class Printer {
         monoSwitchCounter = 0;
     }
 
-    public void acquireTurnstile() {
+    public void acquireEntryLock() {
         try {
-            turnstile.acquire();
+            entryLock.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -44,8 +44,8 @@ public class Printer {
         headArray.add(headNo);
     }
 
-    public void releaseTurnstile() {
-        turnstile.release();
+    public void releaseEntryLock() {
+        entryLock.release();
     }
 
     public void acquireSem(char type) {

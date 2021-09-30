@@ -17,17 +17,11 @@ public class Job extends Thread {
 
     @Override
     public void run() { //remove clunky repeated code
-        printer.acquireTurnstile(); //allows one job in at a time
+        printer.acquireEntryLock(); //allows one job in at a time
         printer.lock(jobType); //locks jobtype to the first job specified
-        //inserts a small delay based on job number, potentially bad practice (i.e. slower systems)
-        try {
-            Thread.sleep(20);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        printer.releaseTurnstile(); //releases turnstile, allowing next job to enter
+        printer.releaseEntryLock(); //releases turnstile, allowing next job to enter
         printer.acquireSem(jobType); //
-        headNo =printer.takeHead();
+        headNo = printer.takeHead();
         int arrTime = printer.getTime();
         System.out.println("(" + arrTime + ") " + jobID + " uses head " + headNo + " (time: " + numPages + ")");
             try {
